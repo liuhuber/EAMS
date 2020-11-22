@@ -1,0 +1,232 @@
+<?php
+include "../../mainfile.php";
+include "function.php";
+
+
+function add_evaluateform($sn = "")
+{
+  global $xoopsDB , $xoopsUser;
+  
+  if($xoopsUser){
+    $isAdmin = $xoopsUser->isAdmin();
+  }else{
+    $isAdmin = false;
+  }
+
+  if(!empty($sn)){
+	$sql="select state from " . $xoopsDB->prefix('requireform') . " where sn = '$sn'";
+	$result=$xoopsDB -> query($sql);
+	list($state)=$xoopsDB -> fetchRow($result);
+	if($state=='3'){		// 	待評估
+		$sql = "select id,state,service_level,module,owner_fullname,category,reqtype,crossteam,owner_crossteam,headline,content from " . $xoopsDB->prefix('requireform') . " where sn = '$sn'";
+		$result = $xoopsDB -> query($sql) or redirect_header(XOOPS_URL , 3 , _MD_REQUIRE_GET_NEWS_ERROR . "<br />" . $xoopsDB->errno() . " : " . $xoopsDB->error());
+		list($id,$state,$service_level,$module,$owner_fullname,$category,$reqtype,$crossteam,$owner_crossteam,$headline,$content) = $xoopsDB -> fetchRow($result);
+	}elseif($state=='13'){	// 待修改
+		$sql = "select id,state,service_level,module,owner_fullname,category,reqtype,crossteam,owner_crossteam,headline,content,
+		est_finish,con_evaluation,con_abaper,con_con,con_basis,min_evaluation,min_abaper,min_con,min_basis,sum_min,sum_hour,possible_solutions from " . $xoopsDB->prefix('requireform') . " where sn = '$sn'";
+		$result = $xoopsDB -> query($sql) or redirect_header(XOOPS_URL , 3 , _MD_REQUIRE_GET_NEWS_ERROR . "<br />" . $xoopsDB->errno() . " : " . $xoopsDB->error());
+		list($id,$state,$service_level,$module,$owner_fullname,$category,$reqtype,$crossteam,$owner_crossteam,$headline,$content,
+		$est_finish,$con_evaluation,$con_abaper,$con_con,$con_basis,$min_evaluation,$min_abaper,$min_con,$min_basis,$sum_min,$sum_hour,$possible_solutions) = $xoopsDB -> fetchRow($result);	
+	}
+
+	$op="update_evaluation";
+  }else{
+	$sn=$id=$state=$service_level=$module=$crossteam=$category=$owner_fullname=$reqtype=$headline=$content="";
+	$op="save_evaluation";
+  }
+  
+  include_once(XOOPS_ROOT_PATH."/class/xoopsformloader.php");
+  $form = new XoopsThemeForm("評估","form", $_SERVER['PHP_SELF']);
+
+  $Tray3=new XoopsFormElementTray("需求單資訊", "&nbsp;", "Tray3", true);
+  $add_id=new XoopsFormText ("需求單編號", "id", "16%", 16, $id);
+  $add_id->setExtra("disabled");
+  $Tray3->addElement($add_id);
+  
+  $state_d=get_statecat_data($state);
+  $add_state=new XoopsFormText ("狀態", "state", "6%", 6, $state_d[sname]);
+  $add_state->setExtra("disabled");
+  $Tray3->addElement($add_state);
+  
+  $add_slevel=new XoopsFormText ("服務等級", "service_level", "6%", 6, $service_level);
+  $add_slevel->setExtra("disabled");
+  $Tray3->addElement($add_slevel);
+  $form->addElement($Tray3);
+  
+  $Tray4=new XoopsFormElementTray("需求單資訊", "&nbsp;", "Tray4", true);
+ 
+  $add_module=new XoopsFormText ("模組", "module", "8%", 8, $module);
+  $add_module->setExtra("disabled");
+  $Tray4->addElement($add_module);
+  
+  $add_owner=new XoopsFormText ("負責顧問", "owner_fullname", "10%", 10, $owner_fullname);
+  $add_owner->setExtra("disabled");
+  $Tray4->addElement($add_owner);
+  
+  $add_category=new XoopsFormText ("類型", "category", "8%", 8, $category);
+  $add_category->setExtra("disabled");
+  $Tray4->addElement($add_category);
+  $form->addElement($Tray4);
+  
+  $add_reqtype=new XoopsFormText ("問題分類", "reqtype", "16%", 16, $reqtype);
+  $add_reqtype->setExtra("disabled");
+  $form->addElement($add_reqtype);
+  
+  $Tray5=new XoopsFormElementTray("跨部門資訊", "&nbsp;", "Tray5", true);
+  $add_crossteam=new XoopsFormRadioYN('是否跨單位需求', 'crossteam', $crossteam);
+  $add_crossteam->setExtra("disabled");
+  $Tray5->addElement($add_crossteam);
+  if($crossteam=="1"){
+	$add_crossowner=new XoopsFormText ("跨模組顧問", "owner_crossteam", "20%", 20, $owner_crossteam);
+	$add_crossowner->setExtra("disabled");
+	$Tray5->addElement($add_crossowner);
+  }  
+  $form->addElement($Tray5);
+
+  $add_headline=new XoopsFormText ("主題", "headline", "80%", 60, $headline);
+  $add_headline->setExtra("disabled");
+  $form->addElement($add_headline);
+  
+  $add_content=new XoopsFormTextArea ("需求內容", "content", $content, 10, 70);
+  $add_content->setExtra("disabled");
+  $form->addElement($add_content);
+  
+  $form->addElement(new XoopsFormCalendar ("預估完成日", "est_finish", 15,$est_finish));
+  
+  /*
+  $select_consultantcat=new XoopsFormSelect ("負責顧問", "owner_fullname", 1, 1);
+  $option_consultantcat=get_consultantcat_select2();
+  $select_consultantcat->addOptionArray($option_consultantcat);
+  $form->addElement($select_consultantcat);
+  */
+  
+  $Tray1=new XoopsFormElementTray("評估資訊", "&nbsp;", "Tray1", true);
+  $select_con_evaluation=new XoopsFormSelect ("評估人員", "con_evaluation", 1, 1);
+  $option_con_evaluation=get_consultantcat_select2();
+  $select_con_evaluation->addOptionArray($option_con_evaluation);
+  $Tray1->addElement($select_con_evaluation);
+  
+  $Tray1->addElement(new XoopsFormText ("評估工時(分)", "min_evaluation", "4%", 4, $min_evaluation));
+  
+  $select_con_abaper=new XoopsFormSelect ("程式設計師 ", "con_abaper", 1, 1);
+  $option_con_abaper=get_consultantcat_select2();
+  $select_con_abaper->addOptionArray($option_con_abaper);
+  $Tray1->addElement($select_con_abaper);  
+  //$Tray1->addElement(new XoopsFormText ("程式設計師 ", "con_abaper", "12%", 12, $con_abaper));
+  
+  $Tray1->addElement(new XoopsFormText ("程式設計師工時(分)", "min_abaper", "4%", 4, $min_abaper));
+  $form->addElement($Tray1);
+
+  $Tray2=new XoopsFormElementTray("評估資訊", "&nbsp;", "Tray2", true);
+  //$Tray2->addElement(new XoopsFormText ("顧問人員", "con_con", "12%", 12, $con_con));
+  $select_con_con=new XoopsFormSelect ("顧問人員", "con_con", 1, 1);
+  $option_con_con=get_consultantcat_select2();
+  $select_con_con->addOptionArray($option_con_con);
+  $Tray2->addElement($select_con_con); 
+  
+  $Tray2->addElement(new XoopsFormText ("顧問工時(分)", "min_con", "4%", 4, $min_con));
+  //$Tray2->addElement(new XoopsFormText ("SAP BASIS", "con_basis", "12%", 12, $con_basis));
+  $select_con_basis=new XoopsFormSelect ("SAP BASIS", "con_basis", 1, 1);
+  $option_con_basis=get_consultantcat_select2();
+  $select_con_basis->addOptionArray($option_con_basis);
+  $Tray2->addElement($select_con_basis);  
+  $Tray2->addElement(new XoopsFormText ("SAP BASIS工時(分)", "min_basis", "4%", 4, $min_basis));
+  $form->addElement($Tray2);
+  
+  //$sum_hour=$sum_min=0;
+  //$total=$_POST['min_evaluation'] + $_POST['min_abaper'] + $_POST['min_con'] + $_POST['min_basis'];
+  //$sum_hour=intval($total / 60);
+  //$sum_min=$total - $sum_hour * 60;
+
+  if(empty($possible_solutions)) $possible_solutions="請輸入評估內容";  
+  $form->addElement(new XoopsFormTextArea ("評估內容", "possible_solutions", $possible_solutions, 10, 70),true);
+
+  $form->addElement(new XoopsFormHidden ("sn", $sn));
+  $form->addElement(new XoopsFormHidden ("op", $op));
+  //$form->addElement(new XoopsFormButton ("", "","送出", "submit"));
+  $Tray9=new XoopsFormElementTray("", "&nbsp;", "Tray9", true); 
+  $Tray9->addElement(new XoopsFormButton ("", "save_post1","送出", "submit"));
+  $Tray9->addElement(new XoopsFormButton ("", "save_post2","評估暫存", "submit"));
+  $form->addElement($Tray9); 
+  
+  $main = $form->render();
+
+  return $main;
+}
+
+function update_evaluation()
+{
+  global $xoopsDB , $xoopsUser;
+  
+  if($xoopsUser){
+	
+	$est_start = date("Y-m-d H:i:s", time());
+	//$est_start = date("Y-m-d H:i:s" , strtotime($_POST['post_date']['date'])+$_POST['post_date']['time']);
+	$total=$_POST['min_evaluation'] + $_POST['min_abaper'] + $_POST['min_con'] + $_POST['min_basis'];
+	$sum_hour=intval($total / 60);
+	$sum_min=$total - $sum_hour * 60;
+	
+	// `owner_fullname` = '".$consultant['cname']."' ,
+	$con_evaluation = get_consultantcat_data($_POST['con_evaluation']);
+	$con_con = get_consultantcat_data($_POST['con_con']);
+	$con_abaper = get_consultantcat_data($_POST['con_abaper']);
+	$con_basis = get_consultantcat_data($_POST['con_basis']);
+	
+	if (!empty($_REQUEST['save_post1'])) $state = 4;	//需求單 state: 4(評估完成)
+	if (!empty($_REQUEST['save_post2'])) $state = 17;	//需求單 state: 17(評估暫存)
+	
+    $sql = "update " . $xoopsDB->prefix('requireform') . " set
+			`state` = '$state' ,
+			`est_start` = '$est_start' ,
+			`est_finish` = '{$_POST['est_finish']}' ,
+            `con_evaluation` = '".$con_evaluation['cname']."' ,
+            `min_evaluation` = '{$_POST['min_evaluation']}' , 
+            `con_abaper` = '".$con_abaper['cname']."' ,
+			`min_abaper` = '{$_POST['min_abaper']}' ,
+            `con_con` = '".$con_con['cname']."' ,
+			`min_con` = '{$_POST['min_con']}' ,
+            `con_basis` = '".$con_basis['cname']."' ,
+			`min_basis` = '{$_POST['min_basis']}' ,
+			`sum_min` = '$sum_min' ,
+			`sum_hour` = '$sum_hour' ,
+			`possible_solutions` = '{$_POST['possible_solutions']}'
+            where `sn` = '{$_POST['sn']}'";
+    $xoopsDB -> queryF($sql) or redirect_header("index.php" , 3 , _MD_MYNEWS_UPDATE_NEWS_ERROR . "<br />" . $xoopsDB->errno() . " : " . $xoopsDB->error());
+  }
+
+  $sn = $xoopsDB->getInsertId();
+  return $sn;
+}
+
+
+// 主程式開始
+
+if(empty($xoopsUser)){
+   redirect_header("index.php" , 3 , _MD_MYNEWS_MUST_LOGIN);
+}
+
+$op=(empty($_REQUEST['op']))?"":$_REQUEST['op'];
+$sn=(empty($_REQUEST['sn']))?"":$_REQUEST['sn'];
+switch ($op)
+{
+  case "save_evaluation":
+  $sn = insert_requireform();
+  header("location:view.php?sn=$sn");
+//  header("location:index.php?sn=$sn");
+	
+  break;
+
+  case "update_evaluation":
+  update_evaluation();
+  header("location:view.php?sn=$sn");
+  //header("location:index.php?sn=$sn");
+  break;
+
+  default:
+  $main = add_evaluateform($sn);
+}
+
+include "../../header.php";
+echo $main;
+include "../../footer.php";
+?> 

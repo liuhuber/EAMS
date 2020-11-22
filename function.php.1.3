@@ -1,0 +1,928 @@
+<?php
+
+function del_requireform($sn = "")
+{
+  global $xoopsDB , $xoopsUser;
+  if($xoopsUser){
+    $isAdmin = $xoopsUser->isAdmin();
+//    $uid = $xoopsUser->uid();
+//    $and_uid = ($isAdmin)? "" : "and uid = '{$uid}'";
+//    $sql = "delete from " . $xoopsDB->prefix('requireform') . " where `sn` = '$sn'";
+	$sql = "update " . $xoopsDB->prefix('requireform') . " set `flag` = "Y" where `sn` = '$sn'";
+    $xoopsDB -> queryF($sql) or redirect_header("index.php" , 3 , _MD_REQUIRE_DEL_NEWS_ERROR . "<br />" . $xoopsDB->errno() . " : " . $xoopsDB->error());
+  }
+}
+
+function update_requireform()
+{
+  global $xoopsDB , $xoopsUser;
+  if($xoopsUser){
+    $isAdmin = $xoopsUser->isAdmin();
+//    $uid = $xoopsUser->uid();
+//    $and_uid = ($isAdmin)? "" : "and uid = '{$uid}'";
+//    $post_date = date("Y-m-d H:i:s" , strtotime($_POST['post_date']['date'])+$_POST['post_date']['time']);
+    $sql = "update " . $xoopsDB->prefix('requireform') . " set `headline` = '{$_POST['headline']}' where `sn` = '{$_POST['sn']}'";
+    $xoopsDB -> queryF($sql) or redirect_header("index.php" , 3 , _MD_REQUIRE_UPDATE_NEWS_ERROR . "<br />" . $xoopsDB->errno() . " : " . $xoopsDB->error());
+  }
+}
+
+function insert_requireform()
+{
+  global $xoopsDB , $xoopsUser;
+
+  if($xoopsUser){
+    $isAdmin = $xoopsUser->isAdmin();
+  }else{
+    $isAdmin = false;
+  }
+  
+  if(!$isAdmin){
+    xoops_load('captcha');
+    $xoopsCaptcha = XoopsCaptcha::getInstance();
+    $xoopsCaptcha->setConfig('skipmember' , false);
+    if(!$xoopsCaptcha->verify()) {
+        redirect_header($_SERVER['PHP_SELF'], 5, $xoopsCaptcha->getMessage());
+    }
+  }
+  
+//  $uid = $xoopsUser->getVar('uid');
+//  $post_date = date("Y-m-d H:i:s" , strtotime($_POST['post_date']['date'])+$_POST['post_date']['time']);
+  $sql="insert into " . $xoopsDB->prefix('requireform') . " (`headline`) values ('{$_POST['headline']}')";
+  $xoopsDB->query($sql);
+  $sn = $xoopsDB->getInsertId();
+  return $sn;
+}
+
+function add_requireform_form($sn = "")
+{
+  global $xoopsDB , $xoopsUser;
+  
+  if($xoopsUser){
+    $isAdmin = $xoopsUser->isAdmin();
+  }else{
+    $isAdmin = false;
+  }
+
+  if(!empty($sn)){
+    $sql = "select * from " . $xoopsDB->prefix('requireform') . " where sn = '$sn'";
+    $result = $xoopsDB -> query($sql) or redirect_header(XOOPS_URL , 3 , _MD_REQUIRE_GET_NEWS_ERROR . "<br />" . $xoopsDB->errno() . " : " . $xoopsDB->error());
+    list($sn , $headline) = $xoopsDB -> fetchRow($result);
+//    $post_date = strtotime($post_date);
+    $op = "update_requireform";
+  }else{
+    $sn = $headline = "";
+    $op = "save_requireform";
+  }
+
+
+  include_once(XOOPS_ROOT_PATH."/class/xoopsformloader.php");
+  $form = new XoopsThemeForm("編輯需求單主旨說明","form", $_SERVER['PHP_SELF']);
+  $form->addElement(new XoopsFormText ("主旨說明", "headline", "100%", 255 , $headline),true);
+//  $configs = array('editor'=> 'ckeditor',  'value' => $content);
+//  $form->addElement(new XoopsFormEditor (_MD_MYNEWS_EDIT_NEWS_CONTENT, "news_content", $configs),true);
+//  $form->addElement(new XoopsFormDateTime (_MD_MYNEWS_SET_TIME, "post_date", 15, $post_date, true));
+//  if(!$isAdmin){
+//    $form->addElement( new XoopsFormCaptcha (_MD_MYNEWS_CAPTCHA, "xoopscaptcha" ,false));
+//  }
+  $form->addElement(new XoopsFormHidden ("sn", $sn));
+  $form->addElement(new XoopsFormHidden ("op", $op));
+  $form->addElement(new XoopsFormButton ("", "", _MD_MYNEWS_SUBMIT, "submit"));
+  $main = $form->render();
+  return $main;
+}
+
+// *************************************************
+function del_departmentcat($department = "")
+{
+  global $xoopsDB , $xoopsUser;
+  if($xoopsUser){
+    $isAdmin = $xoopsUser->isAdmin();
+//    $uid = $xoopsUser->uid();
+//    $and_uid = ($isAdmin)? "" : "and uid = '{$uid}'";
+    $sql = "delete from " . $xoopsDB->prefix('departmentcat') . " where `department` = '$department'";
+    $xoopsDB -> queryF($sql) or redirect_header("index.php" , 3 , _MD_REQUIRE_DEL_NEWS_ERROR . "<br />" . $xoopsDB->errno() . " : " . $xoopsDB->error());
+  }
+}
+
+function update_departmentcat()
+{
+  global $xoopsDB , $xoopsUser;
+  if($xoopsUser){
+    $isAdmin = $xoopsUser->isAdmin();
+//    $uid = $xoopsUser->uid();
+//    $and_uid = ($isAdmin)? "" : "and uid = '{$uid}'";
+//    $post_date = date("Y-m-d H:i:s" , strtotime($_POST['post_date']['date'])+$_POST['post_date']['time']);
+    $sql = "update " . $xoopsDB->prefix('departmentcat') . " set `dname` = '{$_POST['dname']}' where `department` = '{$_POST['department']}'";
+    $xoopsDB -> queryF($sql) or redirect_header("index.php" , 3 , _MD_REQUIRE_UPDATE_NEWS_ERROR . "<br />" . $xoopsDB->errno() . " : " . $xoopsDB->error());
+  }
+}
+
+function insert_departmentcat()
+{
+  global $xoopsDB , $xoopsUser;
+
+  if($xoopsUser){
+    $isAdmin = $xoopsUser->isAdmin();
+  }else{
+    $isAdmin = false;
+  }
+  
+  if(!$isAdmin){
+    xoops_load('captcha');
+    $xoopsCaptcha = XoopsCaptcha::getInstance();
+    $xoopsCaptcha->setConfig('skipmember' , false);
+    if(!$xoopsCaptcha->verify()) {
+        redirect_header($_SERVER['PHP_SELF'], 5, $xoopsCaptcha->getMessage());
+    }
+  }
+  
+//  $uid = $xoopsUser->getVar('uid');
+//  $post_date = date("Y-m-d H:i:s" , strtotime($_POST['post_date']['date'])+$_POST['post_date']['time']);
+  $sql="insert into " . $xoopsDB->prefix('departmentcat') . " (`dname`) values ('{$_POST['dname']}')";
+  $xoopsDB->query($sql);
+  $department = $xoopsDB->getInsertId();
+  return $department;
+}
+
+function add_departmentcat_form($department = "")
+{
+  global $xoopsDB , $xoopsUser;
+  
+  if($xoopsUser){
+    $isAdmin = $xoopsUser->isAdmin();
+  }else{
+    $isAdmin = false;
+  }
+
+  if(!empty($department)){
+    $sql = "select * from " . $xoopsDB->prefix('departmentcat') . " where department = '$department'";
+    $result = $xoopsDB -> query($sql) or redirect_header(XOOPS_URL , 3 , _MD_REQUIRE_GET_NEWS_ERROR . "<br />" . $xoopsDB->errno() . " : " . $xoopsDB->error());
+    list($department , $dname) = $xoopsDB -> fetchRow($result);
+//    $post_date = strtotime($post_date);
+    $op = "update_departmentcat";
+  }else{
+    $department = $dname = "";
+    $op = "save_departmentcat";
+  }
+
+
+  include_once(XOOPS_ROOT_PATH."/class/xoopsformloader.php");
+  $form = new XoopsThemeForm("編輯部門名稱","form", $_SERVER['PHP_SELF']);
+  $form->addElement(new XoopsFormText ("部門名稱", "dname", "100%", 255 , $dname),true);
+//  $configs = array('editor'=> 'ckeditor',  'value' => $content);
+//  $form->addElement(new XoopsFormEditor (_MD_MYNEWS_EDIT_NEWS_CONTENT, "news_content", $configs),true);
+//  $form->addElement(new XoopsFormDateTime (_MD_MYNEWS_SET_TIME, "post_date", 15, $post_date, true));
+//  if(!$isAdmin){
+//    $form->addElement( new XoopsFormCaptcha (_MD_MYNEWS_CAPTCHA, "xoopscaptcha" ,false));
+//  }
+  $form->addElement(new XoopsFormHidden ("department", $department));
+  $form->addElement(new XoopsFormHidden ("op", $op));
+  $form->addElement(new XoopsFormButton ("", "", _MD_MYNEWS_SUBMIT, "submit"));
+  $main = $form->render();
+  return $main;
+}
+
+// *************************************************
+function del_companycat($company = "")
+{
+  global $xoopsDB , $xoopsUser;
+  if($xoopsUser){
+    $isAdmin = $xoopsUser->isAdmin();
+//    $uid = $xoopsUser->uid();
+//    $and_uid = ($isAdmin)? "" : "and uid = '{$uid}'";
+    $sql = "delete from " . $xoopsDB->prefix('companycat') . " where `company` = '$company'";
+    $xoopsDB -> queryF($sql) or redirect_header("index.php" , 3 , _MD_REQUIRE_DEL_NEWS_ERROR . "<br />" . $xoopsDB->errno() . " : " . $xoopsDB->error());
+  }
+}
+
+function update_companycat()
+{
+  global $xoopsDB , $xoopsUser;
+  if($xoopsUser){
+    $isAdmin = $xoopsUser->isAdmin();
+//    $uid = $xoopsUser->uid();
+//    $and_uid = ($isAdmin)? "" : "and uid = '{$uid}'";
+//    $post_date = date("Y-m-d H:i:s" , strtotime($_POST['post_date']['date'])+$_POST['post_date']['time']);
+    $sql = "update " . $xoopsDB->prefix('companycat') . " set `cname` = '{$_POST['cname']}' where `company` = '{$_POST['company']}'";
+    $xoopsDB -> queryF($sql) or redirect_header("index.php" , 3 , _MD_REQUIRE_UPDATE_NEWS_ERROR . "<br />" . $xoopsDB->errno() . " : " . $xoopsDB->error());
+  }
+}
+
+function insert_companycat()
+{
+  global $xoopsDB , $xoopsUser;
+
+  if($xoopsUser){
+    $isAdmin = $xoopsUser->isAdmin();
+  }else{
+    $isAdmin = false;
+  }
+  
+  if(!$isAdmin){
+    xoops_load('captcha');
+    $xoopsCaptcha = XoopsCaptcha::getInstance();
+    $xoopsCaptcha->setConfig('skipmember' , false);
+    if(!$xoopsCaptcha->verify()) {
+        redirect_header($_SERVER['PHP_SELF'], 5, $xoopsCaptcha->getMessage());
+    }
+  }
+  
+//  $uid = $xoopsUser->getVar('uid');
+//  $post_date = date("Y-m-d H:i:s" , strtotime($_POST['post_date']['date'])+$_POST['post_date']['time']);
+  $sql="insert into " . $xoopsDB->prefix('companycat') . " (`cname`) values ('{$_POST['cname']}')";
+  $xoopsDB->query($sql);
+  $company = $xoopsDB->getInsertId();
+  return $company;
+}
+
+function add_companycat_form($company = "")
+{
+  global $xoopsDB , $xoopsUser;
+  
+  if($xoopsUser){
+    $isAdmin = $xoopsUser->isAdmin();
+  }else{
+    $isAdmin = false;
+  }
+
+  if(!empty($company)){
+    $sql = "select * from " . $xoopsDB->prefix('companycat') . " where company = '$company'";
+    $result = $xoopsDB -> query($sql) or redirect_header(XOOPS_URL , 3 , _MD_REQUIRE_GET_NEWS_ERROR . "<br />" . $xoopsDB->errno() . " : " . $xoopsDB->error());
+    list($company , $cname) = $xoopsDB -> fetchRow($result);
+//    $post_date = strtotime($post_date);
+    $op = "update_companycat";
+  }else{
+    $company = $cname = "";
+    $op = "save_companycat";
+  }
+
+
+  include_once(XOOPS_ROOT_PATH."/class/xoopsformloader.php");
+  $form = new XoopsThemeForm("編輯公司名稱","form", $_SERVER['PHP_SELF']);
+  $form->addElement(new XoopsFormText ("公司名稱", "cname", "100%", 255 , $cname),true);
+//  $configs = array('editor'=> 'ckeditor',  'value' => $content);
+//  $form->addElement(new XoopsFormEditor (_MD_MYNEWS_EDIT_NEWS_CONTENT, "news_content", $configs),true);
+//  $form->addElement(new XoopsFormDateTime (_MD_MYNEWS_SET_TIME, "post_date", 15, $post_date, true));
+//  if(!$isAdmin){
+//    $form->addElement( new XoopsFormCaptcha (_MD_MYNEWS_CAPTCHA, "xoopscaptcha" ,false));
+//  }
+  $form->addElement(new XoopsFormHidden ("company", $company));
+  $form->addElement(new XoopsFormHidden ("op", $op));
+  $form->addElement(new XoopsFormButton ("", "", _MD_MYNEWS_SUBMIT, "submit"));
+  $main = $form->render();
+  return $main;
+}
+
+// *************************************************
+function del_prioritycat($priority = "")
+{
+  global $xoopsDB , $xoopsUser;
+  if($xoopsUser){
+    $isAdmin = $xoopsUser->isAdmin();
+//    $uid = $xoopsUser->uid();
+//    $and_uid = ($isAdmin)? "" : "and uid = '{$uid}'";
+    $sql = "delete from " . $xoopsDB->prefix('prioritycat') . " where `priority` = '$priority'";
+    $xoopsDB -> queryF($sql) or redirect_header("index.php" , 3 , _MD_REQUIRE_DEL_NEWS_ERROR . "<br />" . $xoopsDB->errno() . " : " . $xoopsDB->error());
+  }
+}
+
+function update_prioritycat()
+{
+  global $xoopsDB , $xoopsUser;
+  if($xoopsUser){
+    $isAdmin = $xoopsUser->isAdmin();
+//    $uid = $xoopsUser->uid();
+//    $and_uid = ($isAdmin)? "" : "and uid = '{$uid}'";
+//    $post_date = date("Y-m-d H:i:s" , strtotime($_POST['post_date']['date'])+$_POST['post_date']['time']);
+    $sql = "update " . $xoopsDB->prefix('prioritycat') . " set `pname` = '{$_POST['pname']}' where `priority` = '{$_POST['priority']}'";
+    $xoopsDB -> queryF($sql) or redirect_header("index.php" , 3 , _MD_REQUIRE_UPDATE_NEWS_ERROR . "<br />" . $xoopsDB->errno() . " : " . $xoopsDB->error());
+  }
+}
+
+function insert_prioritycat()
+{
+  global $xoopsDB , $xoopsUser;
+
+  if($xoopsUser){
+    $isAdmin = $xoopsUser->isAdmin();
+  }else{
+    $isAdmin = false;
+  }
+  
+  if(!$isAdmin){
+    xoops_load('captcha');
+    $xoopsCaptcha = XoopsCaptcha::getInstance();
+    $xoopsCaptcha->setConfig('skipmember' , false);
+    if(!$xoopsCaptcha->verify()) {
+        redirect_header($_SERVER['PHP_SELF'], 5, $xoopsCaptcha->getMessage());
+    }
+  }
+  
+//  $uid = $xoopsUser->getVar('uid');
+//  $post_date = date("Y-m-d H:i:s" , strtotime($_POST['post_date']['date'])+$_POST['post_date']['time']);
+  $sql="insert into " . $xoopsDB->prefix('prioritycat') . " (`pname`) values ('{$_POST['pname']}')";
+  $xoopsDB->query($sql);
+  $priority = $xoopsDB->getInsertId();
+  return $priority;
+}
+
+function add_prioritycat_form($priority = "")
+{
+  global $xoopsDB , $xoopsUser;
+  
+  if($xoopsUser){
+    $isAdmin = $xoopsUser->isAdmin();
+  }else{
+    $isAdmin = false;
+  }
+
+  if(!empty($priority)){
+    $sql = "select * from " . $xoopsDB->prefix('prioritycat') . " where priority = '$priority'";
+    $result = $xoopsDB -> query($sql) or redirect_header(XOOPS_URL , 3 , _MD_REQUIRE_GET_NEWS_ERROR . "<br />" . $xoopsDB->errno() . " : " . $xoopsDB->error());
+    list($priority , $pname) = $xoopsDB -> fetchRow($result);
+//    $post_date = strtotime($post_date);
+    $op = "update_prioritycat";
+  }else{
+    $priority = $pname = "";
+    $op = "save_prioritycat";
+  }
+
+
+  include_once(XOOPS_ROOT_PATH."/class/xoopsformloader.php");
+  $form = new XoopsThemeForm("編輯優先度","form", $_SERVER['PHP_SELF']);
+  $form->addElement(new XoopsFormText ("優先度", "pname", "100%", 255 , $pname),true);
+//  $configs = array('editor'=> 'ckeditor',  'value' => $content);
+//  $form->addElement(new XoopsFormEditor (_MD_MYNEWS_EDIT_NEWS_CONTENT, "news_content", $configs),true);
+//  $form->addElement(new XoopsFormDateTime (_MD_MYNEWS_SET_TIME, "post_date", 15, $post_date, true));
+//  if(!$isAdmin){
+//    $form->addElement( new XoopsFormCaptcha (_MD_MYNEWS_CAPTCHA, "xoopscaptcha" ,false));
+//  }
+  $form->addElement(new XoopsFormHidden ("priority", $priority));
+  $form->addElement(new XoopsFormHidden ("op", $op));
+  $form->addElement(new XoopsFormButton ("", "", _MD_MYNEWS_SUBMIT, "submit"));
+  $main = $form->render();
+  return $main;
+}
+
+// *************************************************
+function del_projectcat($project = "")
+{
+  global $xoopsDB , $xoopsUser;
+  if($xoopsUser){
+    $isAdmin = $xoopsUser->isAdmin();
+//    $uid = $xoopsUser->uid();
+//    $and_uid = ($isAdmin)? "" : "and uid = '{$uid}'";
+    $sql = "delete from " . $xoopsDB->prefix('projectcat') . " where `project` = '$project'";
+    $xoopsDB -> queryF($sql) or redirect_header("index.php" , 3 , _MD_REQUIRE_DEL_NEWS_ERROR . "<br />" . $xoopsDB->errno() . " : " . $xoopsDB->error());
+  }
+}
+
+function update_projectcat()
+{
+  global $xoopsDB , $xoopsUser;
+  if($xoopsUser){
+    $isAdmin = $xoopsUser->isAdmin();
+//    $uid = $xoopsUser->uid();
+//    $and_uid = ($isAdmin)? "" : "and uid = '{$uid}'";
+//    $post_date = date("Y-m-d H:i:s" , strtotime($_POST['post_date']['date'])+$_POST['post_date']['time']);
+    $sql = "update " . $xoopsDB->prefix('projectcat') . " set `pname` = '{$_POST['pname']}' where `project` = '{$_POST['project']}'";
+    $xoopsDB -> queryF($sql) or redirect_header("index.php" , 3 , _MD_REQUIRE_UPDATE_NEWS_ERROR . "<br />" . $xoopsDB->errno() . " : " . $xoopsDB->error());
+  }
+}
+
+function insert_projectcat()
+{
+  global $xoopsDB , $xoopsUser;
+
+  if($xoopsUser){
+    $isAdmin = $xoopsUser->isAdmin();
+  }else{
+    $isAdmin = false;
+  }
+  
+  if(!$isAdmin){
+    xoops_load('captcha');
+    $xoopsCaptcha = XoopsCaptcha::getInstance();
+    $xoopsCaptcha->setConfig('skipmember' , false);
+    if(!$xoopsCaptcha->verify()) {
+        redirect_header($_SERVER['PHP_SELF'], 5, $xoopsCaptcha->getMessage());
+    }
+  }
+  
+//  $uid = $xoopsUser->getVar('uid');
+//  $post_date = date("Y-m-d H:i:s" , strtotime($_POST['post_date']['date'])+$_POST['post_date']['time']);
+  $sql="insert into " . $xoopsDB->prefix('projectcat') . " (`pname`) values ('{$_POST['pname']}')";
+  $xoopsDB->query($sql);
+  $project = $xoopsDB->getInsertId();
+  return $project;
+}
+
+function add_projectcat_form($project = "")
+{
+  global $xoopsDB , $xoopsUser;
+  
+  if($xoopsUser){
+    $isAdmin = $xoopsUser->isAdmin();
+  }else{
+    $isAdmin = false;
+  }
+
+  if(!empty($project)){
+    $sql = "select * from " . $xoopsDB->prefix('projectcat') . " where project = '$project'";
+    $result = $xoopsDB -> query($sql) or redirect_header(XOOPS_URL , 3 , _MD_REQUIRE_GET_NEWS_ERROR . "<br />" . $xoopsDB->errno() . " : " . $xoopsDB->error());
+    list($project , $pname) = $xoopsDB -> fetchRow($result);
+//    $post_date = strtotime($post_date);
+    $op = "update_projectcat";
+  }else{
+    $project = $pname = "";
+    $op = "save_projectcat";
+  }
+
+
+  include_once(XOOPS_ROOT_PATH."/class/xoopsformloader.php");
+  $form = new XoopsThemeForm("編輯專案名稱","form", $_SERVER['PHP_SELF']);
+  $form->addElement(new XoopsFormText ("專案名稱", "pname", "100%", 255 , $pname),true);
+//  $configs = array('editor'=> 'ckeditor',  'value' => $content);
+//  $form->addElement(new XoopsFormEditor (_MD_MYNEWS_EDIT_NEWS_CONTENT, "news_content", $configs),true);
+//  $form->addElement(new XoopsFormDateTime (_MD_MYNEWS_SET_TIME, "post_date", 15, $post_date, true));
+//  if(!$isAdmin){
+//    $form->addElement( new XoopsFormCaptcha (_MD_MYNEWS_CAPTCHA, "xoopscaptcha" ,false));
+//  }
+  $form->addElement(new XoopsFormHidden ("project", $project));
+  $form->addElement(new XoopsFormHidden ("op", $op));
+  $form->addElement(new XoopsFormButton ("", "", _MD_MYNEWS_SUBMIT, "submit"));
+  $main = $form->render();
+  return $main;
+}
+
+// *************************************************
+function del_statecat($state = "")
+{
+  global $xoopsDB , $xoopsUser;
+  if($xoopsUser){
+    $isAdmin = $xoopsUser->isAdmin();
+//    $uid = $xoopsUser->uid();
+//    $and_uid = ($isAdmin)? "" : "and uid = '{$uid}'";
+    $sql = "delete from " . $xoopsDB->prefix('statecat') . " where `state` = '$state'";
+    $xoopsDB -> queryF($sql) or redirect_header("index.php" , 3 , _MD_REQUIRE_DEL_NEWS_ERROR . "<br />" . $xoopsDB->errno() . " : " . $xoopsDB->error());
+  }
+}
+
+function update_statecat()
+{
+  global $xoopsDB , $xoopsUser;
+  if($xoopsUser){
+    $isAdmin = $xoopsUser->isAdmin();
+//    $uid = $xoopsUser->uid();
+//    $and_uid = ($isAdmin)? "" : "and uid = '{$uid}'";
+//    $post_date = date("Y-m-d H:i:s" , strtotime($_POST['post_date']['date'])+$_POST['post_date']['time']);
+    $sql = "update " . $xoopsDB->prefix('statecat') . " set `sname` = '{$_POST['sname']}' where `state` = '{$_POST['state']}'";
+    $xoopsDB -> queryF($sql) or redirect_header("index.php" , 3 , _MD_REQUIRE_UPDATE_NEWS_ERROR . "<br />" . $xoopsDB->errno() . " : " . $xoopsDB->error());
+  }
+}
+function insert_statecat()
+{
+  global $xoopsDB , $xoopsUser;
+
+  if($xoopsUser){
+    $isAdmin = $xoopsUser->isAdmin();
+  }else{
+    $isAdmin = false;
+  }
+  
+  if(!$isAdmin){
+    xoops_load('captcha');
+    $xoopsCaptcha = XoopsCaptcha::getInstance();
+    $xoopsCaptcha->setConfig('skipmember' , false);
+    if(!$xoopsCaptcha->verify()) {
+        redirect_header($_SERVER['PHP_SELF'], 5, $xoopsCaptcha->getMessage());
+    }
+  }
+  
+//  $uid = $xoopsUser->getVar('uid');
+//  $post_date = date("Y-m-d H:i:s" , strtotime($_POST['post_date']['date'])+$_POST['post_date']['time']);
+  $sql="insert into " . $xoopsDB->prefix('statecat') . " (`sname`) values ('{$_POST['sname']}')";
+  $xoopsDB->query($sql);
+  $state = $xoopsDB->getInsertId();
+  return $state;
+}
+
+function add_statecat_form($state = "")
+{
+  global $xoopsDB , $xoopsUser;
+  
+  if($xoopsUser){
+    $isAdmin = $xoopsUser->isAdmin();
+  }else{
+    $isAdmin = false;
+  }
+
+  if(!empty($state)){
+    $sql = "select * from " . $xoopsDB->prefix('statecat') . " where state = '$state'";
+    $result = $xoopsDB -> query($sql) or redirect_header(XOOPS_URL , 3 , _MD_REQUIRE_GET_NEWS_ERROR . "<br />" . $xoopsDB->errno() . " : " . $xoopsDB->error());
+    list($state , $sname) = $xoopsDB -> fetchRow($result);
+//    $post_date = strtotime($post_date);
+    $op = "update_statecat";
+  }else{
+    $state = $sname = "";
+    $op = "save_statecat";
+  }
+
+
+  include_once(XOOPS_ROOT_PATH."/class/xoopsformloader.php");
+  $form = new XoopsThemeForm("編輯需求單狀態名稱","form", $_SERVER['PHP_SELF']);
+  $form->addElement(new XoopsFormText ("需求單狀態名稱", "sname", "100%", 255 , $sname),true);
+//  $configs = array('editor'=> 'ckeditor',  'value' => $content);
+//  $form->addElement(new XoopsFormEditor (_MD_MYNEWS_EDIT_NEWS_CONTENT, "news_content", $configs),true);
+//  $form->addElement(new XoopsFormDateTime (_MD_MYNEWS_SET_TIME, "post_date", 15, $post_date, true));
+//  if(!$isAdmin){
+//    $form->addElement( new XoopsFormCaptcha (_MD_MYNEWS_CAPTCHA, "xoopscaptcha" ,false));
+//  }
+  $form->addElement(new XoopsFormHidden ("state", $state));
+  $form->addElement(new XoopsFormHidden ("op", $op));
+  $form->addElement(new XoopsFormButton ("", "", _MD_MYNEWS_SUBMIT, "submit"));
+  $main = $form->render();
+  return $main;
+}
+
+// *****************************************************
+/**
+ * 列出所有新聞
+ */
+function list_requireform()
+{
+  global $xoopsDB , $xoopsUser , $xoopsModuleConfig;
+  if($xoopsUser){
+    $now_uid = $xoopsUser->getVar("uid");
+  	$isAdmin = $xoopsUser->isAdmin();
+  }else{
+    $now_uid = $isAdmin = "";
+  }
+  $sql = "select sn,state,headline,module,company,submitter_fullname,priority from " . $xoopsDB->prefix('requireform');
+
+/*  
+  //PageBar(資料數, 每頁顯示幾筆資料, 最多顯示幾個頁數選項);
+  $result = $xoopsDB->query($sql) or redirect_header($_SERVER['PHP_SELF'],3, mysql_error());
+  $total=$xoopsDB->getRowsNum($result);
+
+  $navbar = new PageBar($total, $xoopsModuleConfig['show_num'], 10);
+  $mybar = $navbar->makeBar();
+  $bar= sprintf(_BP_TOOLBAR,$mybar['total'],$mybar['current'])."{$mybar['left']}{$mybar['center']}{$mybar['right']}";
+  $sql.=$mybar['sql'];
+  //分頁工具列為 $bar
+*/  
+  $result = $xoopsDB -> query($sql) or redirect_header(XOOPS_URL , 3 , _MD_MYNEWS_LIST_NEWS_ERROR."<br />" . $xoopsDB->errno() . " : " . $xoopsDB->error());
+  $all_news="";
+  
+  while (list($sn,$state,$headline,$module,$company,$submitter_fullname,$priority)=$xoopsDB->fetchRow($result)) {  
+    $uid_name=XoopsUser::getUnameFromId($uid,0);
+//    $title="<a href='" . XOOPS_URL . "/modules/my_news/view.php?sn=$sn'>$title</a>";
+//    $user="<a href='" . XOOPS_URL . "/userinfo.php?uid=$uid'>$uid_name</a>";
+    if($now_uid == $uid or $isAdmin){
+      $tool = "<a href='index.php?op=del&sn=$sn'>刪除</a> | <a href='index.php?op=modify&sn=$sn'>修改</a>";
+    }else{
+      $tool = "";
+    }
+
+    $all_news .= "
+	<tr>
+    <td>$sn</td>
+    <td>$state</td>
+    <td>$headline</td>
+    <td>$module</td>
+	<td>$company</td>
+    <td>$submitter_fullname</td>
+    <td>$priority</td>
+	<td>$tool</td>
+    </tr>";
+  }
+  $main = "<h4>所有需求單列表</h4>
+  <table class='outer'>
+  <tr>
+  <th>需求單號</th>
+  <th>需求單狀態</th>
+  <th>主旨</th>
+  <th>負責模組</th>
+  <th>公司</th>
+  <th>提單者</th>
+  <th>優先度</th>
+  <th>功能</th>
+  </tr>
+  $all_news
+  </table>
+  <div align='center'>$bar</div>";
+  return $main;
+}
+
+/**
+ * 刪除一筆新聞
+ */
+function del_news($sn = "")
+{
+  global $xoopsDB , $xoopsUser;
+  if($xoopsUser){
+    $isAdmin = $xoopsUser->isAdmin();
+    $uid = $xoopsUser->uid();
+    $and_uid = ($isAdmin)? "" : "and uid = '{$uid}'";
+    $sql = "delete from " . $xoopsDB->prefix('my_news') . " where `sn` = '$sn'";
+    $xoopsDB -> queryF($sql) or redirect_header("index.php" , 3 , _MD_REQUIRE_DEL_NEWS_ERROR . "<br />" . $xoopsDB->errno() . " : " . $xoopsDB->error());
+  }
+}
+
+
+/**
+ * 修改新聞內容
+ */
+function update_news()
+{
+  global $xoopsDB , $xoopsUser;
+  if($xoopsUser){
+    $isAdmin = $xoopsUser->isAdmin();
+    $uid = $xoopsUser->uid();
+    $and_uid = ($isAdmin)? "" : "and uid = '{$uid}'";
+    $post_date = date("Y-m-d H:i:s" , strtotime($_POST['post_date']['date'])+$_POST['post_date']['time']);
+    $sql = "update " . $xoopsDB->prefix('my_news') . " set
+            `title` = '{$_POST['title']}' ,
+            `content` = '{$_POST['news_content']}' ,
+            `post_date` = '{$post_date}'
+            where `sn` = '{$_POST['sn']}' {$and_uid}";
+    $xoopsDB -> queryF($sql) or redirect_header("index.php" , 3 , _MD_REQUIRE_UPDATE_NEWS_ERROR . "<br />" . $xoopsDB->errno() . " : " . $xoopsDB->error());
+  }
+}
+
+
+/**
+ * 新聞發布介面
+ */
+function add_form($sn = "")
+{
+  global $xoopsDB , $xoopsUser;
+  
+  if($xoopsUser){
+    $isAdmin = $xoopsUser->isAdmin();
+  }else{
+    $isAdmin = false;
+  }
+
+  if(!empty($sn)){
+    $sql = "select * from " . $xoopsDB->prefix('my_news') . " where sn = '$sn'";
+    $result = $xoopsDB -> query($sql) or redirect_header(XOOPS_URL , 3 , _MD_REQUIRE_GET_NEWS_ERROR . "<br />" . $xoopsDB->errno() . " : " . $xoopsDB->error());
+    list($sn , $title , $content , $post_date , $uid , $counter) = $xoopsDB -> fetchRow($result);
+    $post_date = strtotime($post_date);
+    $op = "update_news";
+  }else{
+    $sn = $title = $content = $post_date = $uid = $counter = "";
+    $op = "save_news";
+  }
+
+
+  include_once(XOOPS_ROOT_PATH."/class/xoopsformloader.php");
+  $form = new XoopsThemeForm(_MD_MYNEWS_EDIT_NEWS,"form", $_SERVER['PHP_SELF']);
+  $form->addElement(new XoopsFormText (_MD_MYNEWS_TITLE, "title", "100%", 255 , $title),true);
+  $configs = array('editor'=> 'ckeditor',  'value' => $content);
+  $form->addElement(new XoopsFormEditor (_MD_MYNEWS_EDIT_NEWS_CONTENT, "news_content", $configs),true);
+  $form->addElement(new XoopsFormDateTime (_MD_MYNEWS_SET_TIME, "post_date", 15, $post_date, true));
+  if(!$isAdmin){
+    $form->addElement( new XoopsFormCaptcha (_MD_MYNEWS_CAPTCHA, "xoopscaptcha" ,false));
+  }
+  $form->addElement(new XoopsFormHidden ("sn", $sn));
+  $form->addElement(new XoopsFormHidden ("op", $op));
+  $form->addElement(new XoopsFormButton ("", "", _MD_MYNEWS_SUBMIT, "submit"));
+  $main = $form->render();
+  return $main;
+}
+
+
+
+/**
+ * 將新聞存入資料庫
+ */
+function insert_news()
+{
+  global $xoopsDB , $xoopsUser;
+
+  if($xoopsUser){
+    $isAdmin = $xoopsUser->isAdmin();
+  }else{
+    $isAdmin = false;
+  }
+  
+  if(!$isAdmin){
+    xoops_load('captcha');
+    $xoopsCaptcha = XoopsCaptcha::getInstance();
+    $xoopsCaptcha->setConfig('skipmember' , false);
+    if(!$xoopsCaptcha->verify()) {
+        redirect_header($_SERVER['PHP_SELF'], 5, $xoopsCaptcha->getMessage());
+    }
+  }
+  
+  $uid = $xoopsUser->getVar('uid');
+  $post_date = date("Y-m-d H:i:s" , strtotime($_POST['post_date']['date'])+$_POST['post_date']['time']);
+  $sql="insert into " . $xoopsDB->prefix('my_news') . "
+  (`title` , `content` , `post_date` , `uid`)
+  values
+  ('{$_POST['title']}' , '{$_POST['news_content']}' , '{$post_date}' , $uid)";
+  $xoopsDB->query($sql);
+  $sn = $xoopsDB->getInsertId();
+  return $sn;
+}
+
+
+
+/**
+ * 自製前台用的連結工具
+ */
+function my_menu()
+{
+  global $xoopsUser;
+  $menu = "";
+  if($xoopsUser){
+    $isAdmin = $xoopsUser->isAdmin();
+    if($isAdmin){
+      $menu = "<div>[<a href='admin/index.php'>" . _MD_MYNEWS_ADMIN . "</a>]</div>";
+    }
+  }
+  return $menu;
+}
+
+//分頁物件
+class PageBar{
+	// 目前所在頁碼
+	var $current;
+	// 所有的資料數量 (rows)
+	var $total;
+	// 每頁顯示幾筆資料
+	var $limit;
+	// 目前在第幾層的頁數選項？
+	var $pCurrent;
+	// 總共分成幾頁？
+	var $pTotal;
+	// 每一層最多有幾個頁數選項可供選擇，如：3 = {[1][2][3]}
+	var $pLimit;
+	var $prev;
+	var $next;
+	var $prev_layer = ' ';
+	var $next_layer = ' ';
+	var $first;
+	var $last;
+	var $bottons = array();
+	// 要使用的 URL 頁數參數名？
+	var $url_page = "g2p";
+	// 要使用的 URL 讀取時間參數名？
+	var $url_loadtime = "loadtime";
+	// 會使用到的 URL 變數名，給 process_query() 過濾用的。
+	var $used_query = array();
+	// 目前頁數顏色
+	var $act_color = "#990000";
+	var $query_str; // 存放 URL 參數列
+
+	function PageBar($total, $limit, $page_limit){
+		$mydirname = basename( dirname( __FILE__ ) ) ;
+		$this->prev = "<img src='".XOOPS_URL."/modules/{$mydirname}/images/1leftarrow.gif' alt='"._BP_BACK_PAGE."' align='absmiddle' hspace=3>"._BP_BACK_PAGE;
+		$this->next = "<img src='".XOOPS_URL."/modules/{$mydirname}/images/1rightarrow.gif' alt='"._BP_NEXT_PAGE."' align='absmiddle' hspace=3>"._BP_NEXT_PAGE;
+		$this->first = "<img src='".XOOPS_URL."/modules/{$mydirname}/images/2leftarrow.gif' alt='"._BP_FIRST_PAGE."' align='absmiddle' hspace=3>"._BP_FIRST_PAGE;
+		$this->last = "<img src='".XOOPS_URL."/modules/{$mydirname}/images/2rightarrow.gif' alt='"._BP_LAST_PAGE."' align='absmiddle' hspace=3>"._BP_LAST_PAGE;
+
+		$this->limit = $limit;
+		$this->total = $total;
+		$this->pLimit = $page_limit;
+	}
+
+	function init(){
+		$this->used_query = array($this->url_page, $this->url_loadtime);
+		$this->query_str = $this->processQuery($this->used_query);
+		$this->glue = ($this->query_str == "")?'?':
+		'&';
+		$this->current = (isset($_GET["$this->url_page"]))? $_GET["$this->url_page"]:
+		1;
+		$this->pTotal = ceil($this->total / $this->limit);
+		$this->pCurrent = ceil($this->current / $this->pLimit);
+	}
+
+	//初始設定
+	function set($active_color = "none", $buttons = "none"){
+		if ($active_color != "none"){
+			$this->act_color = $active_color;
+		}
+
+		if ($buttons != "none"){
+			$this->buttons = $buttons;
+			$this->prev = $this->buttons['prev'];
+			$this->next = $this->buttons['next'];
+			$this->prev_layer = $this->buttons['prev_layer'];
+			$this->next_layer = $this->buttons['next_layer'];
+			$this->first = $this->buttons['first'];
+			$this->last = $this->buttons['last'];
+		}
+	}
+
+	// 處理 URL 的參數，過濾會使用到的變數名稱
+	function processQuery($used_query){
+		// 將 URL 字串分離成二維陣列
+		$vars = explode("&", $_SERVER['QUERY_STRING']);
+		for($i = 0; $i < count($vars); $i++){
+			$var[$i] = explode("=", $vars[$i]);
+		}
+
+		// 過濾要使用的 URL 變數名稱
+		for($i = 0; $i < count($var); $i++){
+			for($j = 0; $j < count($used_query); $j++){
+				if (isset($var[$i][0]) && $var[$i][0] == $used_query[$j]) $var[$i] = array();
+			}
+		}
+
+		// 合併變數名與變數值
+		for($i = 0; $i < count($var); $i++){
+			$vars[$i] = implode("=", $var[$i]);
+		}
+
+		// 合併為一完整的 URL 字串
+		$processed_query = "";
+		for($i = 0; $i < count($vars); $i++){
+			$glue = ($processed_query == "")?'?':
+			'&';
+			// 開頭第一個是 '?' 其餘的才是 '&'
+			if ($vars[$i] != "") $processed_query .= $glue.$vars[$i];
+		}
+		return $processed_query;
+	}
+
+	// 製作 sql 的 query 字串 (LIMIT)
+	function sqlQuery(){
+		$row_start = ($this->current * $this->limit) - $this->limit;
+		$sql_query = " LIMIT {$row_start}, {$this->limit}";
+		return $sql_query;
+	}
+
+
+	// 製作 bar
+	function makeBar($url_page = "none"){
+		if ($url_page != "none"){
+			$this->url_page = $url_page;
+		}
+		$this->init();
+
+		// 取得目前時間
+		$loadtime = '&loadtime='.time();
+
+		// 取得目前頁框(層)的第一個頁數啟始值，如 6 7 8 9 10 = 6
+		$i = ($this->pCurrent * $this->pLimit) - ($this->pLimit - 1);
+
+		$bar_center = "";
+		while ($i <= $this->pTotal && $i <= ($this->pCurrent * $this->pLimit)){
+			if ($i == $this->current){
+				$bar_center = "{$bar_center}<font color='{$this->act_color}'>[{$i}]</font>";
+			}else{
+				$bar_center .= " <a href='{$_SERVER['PHP_SELF']}{$this->query_str}{$this->glue}{$this->url_page}={$i}{$loadtime}'' title='{$i}'>{$i}</a> ";
+			}
+			$i++;
+		}
+		$bar_center = $bar_center . "";
+
+		// 往前跳一頁
+		if ($this->current <= 1){
+			$bar_left = " {$this->prev} ";
+			$bar_first = " {$this->first} ";
+		}	else{
+			$i = $this->current-1;
+			$bar_left = " <a href='{$_SERVER['PHP_SELF']}{$this->query_str}{$this->glue}{$this->url_page}={$i}{$loadtime}' title='"._BP_BACK_PAGE."'>{$this->prev}</a> ";
+			$bar_first = " <a href='{$_SERVER['PHP_SELF']}{$this->query_str}{$this->glue}{$this->url_page}=1{$loadtime}' title='"._BP_FIRST_PAGE."'>{$this->first}</a> ";
+		}
+
+		// 往後跳一頁
+		if ($this->current >= $this->pTotal){
+			$bar_right = " {$this->next} ";
+			$bar_last = " {$this->last} ";
+		}	else{
+			$i = $this->current + 1;
+			$bar_right = " <a href='{$_SERVER['PHP_SELF']}{$this->query_str}{$this->glue}{$this->url_page}={$i}{$loadtime}' title='"._BP_NEXT_PAGE."'>{$this->next}</a> ";
+			$bar_last = " <a href='{$_SERVER['PHP_SELF']}{$this->query_str}{$this->glue}{$this->url_page}={$this->pTotal}{$loadtime}' title='"._BP_LAST_PAGE."'>{$this->last}</a> ";
+		}
+
+		// 往前跳一整個頁框(層)
+		if (($this->current - $this->pLimit) < 1){
+			$bar_l = " {$this->prev_layer} ";
+		}	else{
+			$i = $this->current - $this->pLimit;
+			$bar_l = " <a href='{$_SERVER['PHP_SELF']}{$this->query_str}{$this->glue}{$this->url_page}={$i}{$loadtime}' title='".sprintf($this->pLimit,_BP_GO_BACK_PAGE)."'>{$this->prev_layer}</a> ";
+		}
+
+		//往後跳一整個頁框(層)
+		if (($this->current + $this->pLimit) > $this->pTotal){
+			$bar_r = " {$this->next_layer} ";
+		}	else{
+			$i = $this->current + $this->pLimit;
+			$bar_r = " <a href='{$_SERVER['PHP_SELF']}{$this->query_str}{$this->glue}{$this->url_page}={$i}{$loadtime}' title='".sprintf($this->pLimit,_BP_GO_NEXT_PAGE)."'>{$this->next_layer}</a> ";
+		}
+
+		$page_bar['center'] = $bar_center;
+		$page_bar['left'] = $bar_first . $bar_l . $bar_left;
+		$page_bar['right'] = $bar_right . $bar_r . $bar_last;
+		$page_bar['current'] = $this->current;
+		$page_bar['total'] = $this->pTotal;
+		$page_bar['sql'] = $this->sqlQuery();
+		return $page_bar;
+	}
+
+}
+?>
